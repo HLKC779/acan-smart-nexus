@@ -10,6 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { APIKeyManager } from "@/components/APIKeyManager";
+import { 
+  ElevenLabsService, 
+  ImageAnalysisService, 
+  VoiceRecordingService, 
+  AIChatService, 
+  AudioPlayerService 
+} from "@/lib/aiServices";
 import {
   Send,
   Mic,
@@ -45,6 +53,7 @@ interface Message {
   timestamp: Date;
   attachments?: Attachment[];
   aiTask?: string;
+  audioUrl?: string;
 }
 
 interface Attachment {
@@ -69,6 +78,18 @@ const AIChat = () => {
   const [selectedCapability, setSelectedCapability] = useState('chat');
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [elevenLabsKey, setElevenLabsKey] = useState(() => 
+    localStorage.getItem('elevenlabs-api-key') || ''
+  );
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // AI Services
+  const [elevenLabsService, setElevenLabsService] = useState<ElevenLabsService | null>(null);
+  const [imageAnalysisService] = useState(new ImageAnalysisService());
+  const [voiceRecordingService] = useState(new VoiceRecordingService());
+  const [aiChatService] = useState(new AIChatService());
+  const [audioPlayerService] = useState(new AudioPlayerService());
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -101,6 +122,18 @@ const AIChat = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    // Save API key to localStorage
+    localStorage.setItem('elevenlabs-api-key', elevenLabsKey);
+    
+    // Initialize ElevenLabs service if key is provided
+    if (elevenLabsKey.trim()) {
+      setElevenLabsService(new ElevenLabsService(elevenLabsKey));
+    } else {
+      setElevenLabsService(null);
+    }
+  }, [elevenLabsKey]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -124,84 +157,126 @@ const AIChat = () => {
     };
 
     setMessages(prev => [...prev, newMessage]);
+    const currentText = currentMessage;
+    const currentFile = selectedFile;
     setCurrentMessage('');
     setSelectedFile(null);
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
+    try {
+      // Generate AI response
+      const aiResponseContent = await aiChatService.generateResponse(
+        currentText, 
+        selectedCapability, 
+        !!currentFile
+      );
+
+      let audioUrl: string | undefined;
+
+      // Handle specific AI capabilities
+      if (selectedCapability === 'text-to-speech' && elevenLabsService) {
+        try {
+          const audioBlob = await elevenLabsService.textToSpeech(currentText);
+          audioUrl = URL.createObjectURL(audioBlob);
+          
+          if (autoSpeak) {
+            await audioPlayerService.playAudio(audioBlob);
+          }
+        } catch (error) {
+          console.error("Text-to-speech error:", error);
+          toast({
+            title: "Text-to-Speech Error",
+            description: "Please check your ElevenLabs API key",
+            variant: "destructive",
+          });
+        }
+      } else if (selectedCapability === 'image-analysis' && currentFile) {
+        try {
+          const analysisResult = await imageAnalysisService.analyzeImage(currentFile);
+          // Update the response with actual analysis
+          const updatedResponse = aiResponseContent + "\n\n" + analysisResult;
+          
+          const aiResponse: Message = {
+            id: (Date.now() + 1).toString(),
+            type: 'assistant',
+            content: updatedResponse,
+            timestamp: new Date(),
+            aiTask: selectedCapability,
+            audioUrl
+          };
+          setMessages(prev => [...prev, aiResponse]);
+          setIsProcessing(false);
+          return;
+        } catch (error) {
+          console.error("Image analysis error:", error);
+          toast({
+            title: "Image Analysis Error",
+            description: "Failed to analyze image. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: generateAIResponse(newMessage),
+        content: aiResponseContent,
         timestamp: new Date(),
-        aiTask: selectedCapability
+        aiTask: selectedCapability,
+        audioUrl
       };
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("AI response error:", error);
+      toast({
+        title: "AI Error",
+        description: "Failed to generate response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsProcessing(false);
+    }
+  };
 
-      if (autoSpeak && selectedCapability === 'text-to-speech') {
-        simulateTextToSpeech(aiResponse.content);
+  const playAudio = async (audioUrl: string) => {
+    try {
+      const response = await fetch(audioUrl);
+      const audioBlob = await response.blob();
+      await audioPlayerService.playAudio(audioBlob);
+    } catch (error) {
+      console.error("Audio playback error:", error);
+      toast({
+        title: "Playback Error",
+        description: "Failed to play audio",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleRecording = async () => {
+    try {
+      if (!isRecording) {
+        await voiceRecordingService.startRecording();
+        setIsRecording(true);
+      } else {
+        const audioBlob = await voiceRecordingService.stopRecording();
+        setIsRecording(false);
+        
+        // For now, just show success message
+        // In a real implementation, you'd convert speech to text here
+        toast({
+          title: "Recording Complete",
+          description: "Voice recording captured successfully",
+        });
       }
-    }, 2000);
-  };
-
-  const generateAIResponse = (userMessage: Message): string => {
-    const capability = userMessage.aiTask;
-    const hasAttachment = userMessage.attachments && userMessage.attachments.length > 0;
-
-    switch (capability) {
-      case 'text-to-speech':
-        return `🎵 Converting your text to speech: "${userMessage.content}"\n\nAudio has been generated with natural voice synthesis. You can play it using the controls below.`;
-      
-      case 'text-to-image':
-        return `🎨 Generated image based on: "${userMessage.content}"\n\nI've created a high-quality image using advanced diffusion models. The image captures the essence of your prompt with artistic flair.`;
-      
-      case 'image-to-video':
-        return hasAttachment 
-          ? `🎬 Converting your image to video...\n\nI'm creating a dynamic video sequence from your image using motion synthesis. The video will include smooth transitions and realistic movement.`
-          : `Please upload an image first to convert it to video.`;
-      
-      case 'image-analysis':
-        return hasAttachment
-          ? `👁️ Analyzing your image...\n\nI can see: Objects, people, text, colors, composition, and context. The image shows excellent lighting and contains several interesting elements that I can describe in detail.`
-          : `Please upload an image for me to analyze.`;
-      
-      case 'code-generation':
-        return `💻 Generated code for: "${userMessage.content}"\n\n\`\`\`python\n# AI-generated code\ndef solve_problem():\n    # Implementation based on your requirements\n    return "Solution implemented"\n\`\`\`\n\nThe code follows best practices and includes error handling.`;
-      
-      case 'research':
-        return `🔍 Research results for: "${userMessage.content}"\n\nI've gathered comprehensive information from multiple sources. Here are the key findings, trends, and insights relevant to your query.`;
-      
-      case 'brainstorming':
-        return `💡 Brainstorming ideas for: "${userMessage.content}"\n\n1. Creative approach with innovative features\n2. User-centered design thinking\n3. Technology integration opportunities\n4. Market differentiation strategies\n5. Implementation roadmap`;
-      
-      default:
-        return `I understand you're asking about "${userMessage.content}". I can help you with this using my advanced AI capabilities. Would you like me to process this with a specific AI function?`;
-    }
-  };
-
-  const simulateTextToSpeech = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      speechSynthesis.speak(utterance);
-    }
-  };
-
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    if (!isRecording) {
+    } catch (error) {
+      console.error("Recording error:", error);
       toast({
-        title: "Recording Started",
-        description: "Speak now to input your message",
+        title: "Recording Error",
+        description: error instanceof Error ? error.message : "Failed to record audio",
+        variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Recording Stopped",
-        description: "Processing your voice input...",
-      });
+      setIsRecording(false);
     }
   };
 
@@ -257,7 +332,11 @@ const AIChat = () => {
                   onCheckedChange={setAutoSpeak}
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowSettings(!showSettings)}
+              >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
@@ -269,7 +348,14 @@ const AIChat = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Capabilities Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
+            {/* API Configuration */}
+            {showSettings && (
+              <APIKeyManager
+                elevenLabsKey={elevenLabsKey}
+                onElevenLabsKeyChange={setElevenLabsKey}
+              />
+            )}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -364,6 +450,26 @@ const AIChat = () => {
                           </div>
                         )}
                         <div className="whitespace-pre-wrap">{message.content}</div>
+                        
+                        {/* Audio Player for TTS */}
+                        {message.audioUrl && (
+                          <div className="mt-3 p-2 bg-background/50 rounded border">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => playAudio(message.audioUrl!)}
+                              >
+                                <Play className="w-3 h-3 mr-1" />
+                                Play Audio
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                AI-generated speech
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        
                         <div className="flex items-center justify-between mt-2 text-xs opacity-70">
                           <span>{message.timestamp.toLocaleTimeString()}</span>
                           {message.aiTask && (
