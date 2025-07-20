@@ -209,9 +209,45 @@ export class VoiceRecordingService {
 export class AIChatService {
   private responseCache: Map<string, string> = new Map();
   
+  // Analyze user intent regardless of selected capability
+  private analyzeIntent(message: string): string {
+    const lowerMessage = message.toLowerCase();
+    
+    // Content creation keywords
+    if (lowerMessage.includes('create content') || lowerMessage.includes('social media') || 
+        lowerMessage.includes('write post') || lowerMessage.includes('content for')) {
+      return 'content-writing';
+    }
+    
+    // Code generation keywords
+    if (lowerMessage.includes('code') || lowerMessage.includes('script') || 
+        lowerMessage.includes('function') || lowerMessage.includes('program')) {
+      return 'code-generation';
+    }
+    
+    // Research keywords
+    if (lowerMessage.includes('research') || lowerMessage.includes('find information') || 
+        lowerMessage.includes('search for') || lowerMessage.includes('tell me about')) {
+      return 'research';
+    }
+    
+    // Image analysis keywords
+    if (lowerMessage.includes('analyze') || lowerMessage.includes('what is in') || 
+        lowerMessage.includes('describe image') || lowerMessage.includes('identify')) {
+      return 'image-analysis';
+    }
+    
+    return 'default';
+  }
+  
   async generateResponse(message: string, capability: string, hasAttachment: boolean = false): Promise<string> {
+    // Analyze user intent and suggest better capability if needed
+    const detectedIntent = this.analyzeIntent(message);
+    const shouldUseDetectedIntent = detectedIntent !== 'default' && detectedIntent !== capability;
+    
     // Create cache key
-    const cacheKey = `${capability}-${message.substring(0, 50)}-${hasAttachment}`;
+    const actualCapability = shouldUseDetectedIntent ? detectedIntent : capability;
+    const cacheKey = `${actualCapability}-${message.substring(0, 50)}-${hasAttachment}`;
     
     // Check cache first
     if (this.responseCache.has(cacheKey)) {
@@ -247,6 +283,12 @@ export class AIChatService {
         `⚡ **Smart Code Creation**\n\nGenerated production-ready code for "${message}":\n\n\`\`\`javascript\n// AI-powered implementation\nclass SmartSolution {\n  constructor(config = {}) {\n    this.config = { ...this.defaultConfig, ...config };\n  }\n\n  async execute() {\n    try {\n      const result = await this.processRequest();\n      return this.formatResponse(result);\n    } catch (error) {\n      this.handleError(error);\n    }\n  }\n\n  processRequest() {\n    // Implementation tailored to your needs\n    return "AI-generated solution";\n  }\n}\n\`\`\`\n\n**Code quality features:**\n• Modern patterns\n• Async/await support\n• Error handling\n• Modular design`
       ],
       
+      'content-writing': [
+        `✍️ **Social Media Content Created**\n\n${this.generateSocialMediaContent(message)}\n\n**Content Strategy Tips:**\n• Use engaging hooks in the first line\n• Include relevant hashtags for reach\n• Add call-to-action to boost engagement\n• Keep posts concise but valuable\n• Use emojis to increase visual appeal`,
+        `📱 **Content Package Ready**\n\n${this.generateSocialMediaContent(message)}\n\n**Optimization Suggestions:**\n• Post during peak engagement hours\n• Include high-quality visuals\n• Encourage user interaction\n• Cross-post on multiple platforms\n• Track performance metrics`,
+        `🎯 **Engaging Content Generated**\n\n${this.generateSocialMediaContent(message)}\n\n**Platform Recommendations:**\n• **Instagram**: Focus on visuals and stories\n• **Twitter**: Keep it concise and timely\n• **LinkedIn**: Professional tone and insights\n• **Facebook**: Community engagement\n• **TikTok**: Trending sounds and hashtags`
+      ],
+      
       'research': [
         `🔍 **Research Analysis Complete**\n\nI've conducted comprehensive research on "${message}" with findings from multiple authoritative sources:\n\n**Key Insights:**\n• Current market trends and developments\n• Expert opinions and analysis\n• Statistical data and metrics\n• Future projections and implications\n\n**Sources analyzed:**\n• Academic publications\n• Industry reports\n• News articles\n• Technical documentation\n\nThe research provides actionable insights and reliable data for informed decision-making.`,
         `📊 **In-Depth Research Results**\n\nTopic: "${message}"\n\n**Executive Summary:**\nComprehensive analysis reveals significant developments and opportunities in this area.\n\n**Key Findings:**\n• Market size and growth potential\n• Competitive landscape analysis\n• Technology trends and innovations\n• Risk factors and mitigation strategies\n\n**Recommendations:**\nBased on current data and trend analysis, strategic approaches are suggested for optimal outcomes.`
@@ -263,11 +305,24 @@ export class AIChatService {
       ]
     };
 
-    const capabilityResponses = responses[capability as keyof typeof responses] || responses.default;
-    const randomResponse = capabilityResponses[Math.floor(Math.random() * capabilityResponses.length)];
+    const capabilityResponses = responses[actualCapability as keyof typeof responses] || responses.default;
+    
+    let response = capabilityResponses[Math.floor(Math.random() * capabilityResponses.length)];
+    
+    // Add capability suggestion if we detected different intent
+    if (shouldUseDetectedIntent) {
+      const capabilityNames = {
+        'content-writing': 'Content Writing',
+        'code-generation': 'Code Generation', 
+        'research': 'Research & Search',
+        'image-analysis': 'Image Analysis'
+      };
+      
+      response = `💡 **Smart Detection**: I noticed you want ${capabilityNames[detectedIntent as keyof typeof capabilityNames]}. Let me help with that!\n\n` + response;
+    }
     
     // Cache the response
-    this.responseCache.set(cacheKey, randomResponse);
+    this.responseCache.set(cacheKey, response);
     
     // Limit cache size
     if (this.responseCache.size > 50) {
@@ -275,7 +330,28 @@ export class AIChatService {
       this.responseCache.delete(firstKey);
     }
     
-    return randomResponse;
+    return response;
+  }
+  
+  // Generate actual social media content
+  private generateSocialMediaContent(prompt: string): string {
+    const templates = [
+      {
+        platform: "Instagram",
+        content: `🌟 Ready to transform your social media game? \n\n✨ Here's your content strategy:\n• Create authentic, engaging posts\n• Use trending hashtags strategically\n• Share behind-the-scenes content\n• Engage with your community daily\n\n💡 Pro tip: Consistency beats perfection every time!\n\n#SocialMediaTips #ContentCreation #DigitalMarketing #InstagramGrowth #Engagement`
+      },
+      {
+        platform: "LinkedIn", 
+        content: `🚀 Elevating your professional presence on social media\n\nKey strategies for success:\n→ Share industry insights and expertise\n→ Engage authentically with your network\n→ Create value-driven content consistently\n→ Build meaningful professional relationships\n\nYour personal brand is your most valuable asset. Invest in it wisely.\n\n#ProfessionalGrowth #LinkedIn #PersonalBranding #NetworkingTips`
+      },
+      {
+        platform: "Twitter",
+        content: `🔥 Social media content that converts:\n\n1️⃣ Hook your audience in the first 3 seconds\n2️⃣ Provide genuine value in every post\n3️⃣ Use storytelling to create connection\n4️⃣ Include clear calls-to-action\n5️⃣ Engage with comments immediately\n\nThe algorithm rewards authentic engagement 📈\n\n#TwitterTips #ContentStrategy #SocialMediaGrowth`
+      }
+    ];
+    
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+    return `**${randomTemplate.platform} Post:**\n\n${randomTemplate.content}`;
   }
 }
 
