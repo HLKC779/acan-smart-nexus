@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Bot } from "lucide-react";
+import { Menu, X, Bot, Brain } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -69,7 +70,16 @@ const Navigation = () => {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
+            <Link to="/ai-chat">
+              <Button 
+                variant="outline"
+                className="border-primary/20 text-primary hover:bg-primary/10"
+              >
+                <Brain className="w-4 h-4 mr-2" />
+                AI Chat
+              </Button>
+            </Link>
             <Button 
               onClick={() => scrollToSection('cta')}
               className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
@@ -104,7 +114,16 @@ const Navigation = () => {
                   {item.label}
                 </button>
               ))}
-              <div className="pt-2">
+              <div className="pt-2 space-y-2">
+                <Link to="/ai-chat" className="block">
+                  <Button 
+                    variant="outline"
+                    className="w-full border-primary/20 text-primary hover:bg-primary/10"
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    AI Chat
+                  </Button>
+                </Link>
                 <Button 
                   onClick={() => scrollToSection('cta')}
                   className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
