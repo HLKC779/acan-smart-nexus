@@ -36,45 +36,49 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
       isScrolled 
-        ? 'bg-background/80 backdrop-blur-md border-b border-border/50' 
+        ? 'bg-background/90 backdrop-blur-xl border-b border-border/30 shadow-floating' 
         : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div 
             className="flex items-center space-x-3 cursor-pointer group"
             onClick={() => scrollToSection('hero')}
           >
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Bot className="w-4 h-4 text-background" />
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-glow transition-all duration-500">
+                <Bot className="w-5 h-5 text-background" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-primary rounded-xl blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500 -z-10"></div>
             </div>
-            <span className="font-bold font-inter text-lg text-foreground">
+            <span className="font-bold font-inter text-xl text-foreground group-hover:text-agent-blue transition-colors duration-300">
               AI Agent Systems
             </span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-300 font-medium"
+                className="relative px-4 py-2 text-muted-foreground hover:text-agent-blue transition-all duration-300 font-medium group"
               >
                 {item.label}
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </button>
             ))}
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-4">
             <Link to="/ai-chat">
               <Button 
                 variant="outline"
-                className="border-primary/20 text-primary hover:bg-primary/10"
+                className="border-agent-blue/30 text-agent-blue hover:bg-agent-blue/10 hover:border-agent-blue/50 hover:shadow-glow/50 transition-all duration-300"
               >
                 <Brain className="w-4 h-4 mr-2" />
                 AI Chat
@@ -82,7 +86,7 @@ const Navigation = () => {
             </Link>
             <Button 
               onClick={() => scrollToSection('cta')}
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+              className="bg-gradient-primary hover:shadow-glow hover:scale-105 transition-all duration-300 font-semibold"
             >
               Get Started
             </Button>
