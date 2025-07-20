@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Bot, Brain } from "lucide-react";
+import { Menu, X, Bot, Brain, User, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,12 +97,36 @@ const Navigation = () => {
                 AI Chat
               </Button>
             </Link>
-            <Button 
-              onClick={() => scrollToSection('cta')}
-              className="bg-gradient-primary hover:shadow-glow hover:scale-105 transition-all duration-300 font-semibold"
-            >
-              Get Started
-            </Button>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline"
+                    className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Account
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-gradient-primary hover:shadow-glow hover:scale-105 transition-all duration-300 font-semibold">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -128,12 +165,28 @@ const Navigation = () => {
                     AI Chat
                   </Button>
                 </Link>
-                <Button 
-                  onClick={() => scrollToSection('cta')}
-                  className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
-                >
-                  Get Started
-                </Button>
+                
+                {user ? (
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground px-3 py-2">
+                      {user.email}
+                    </div>
+                    <Button 
+                      onClick={handleSignOut}
+                      variant="outline"
+                      className="w-full border-destructive/20 text-destructive hover:bg-destructive/10"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to="/auth" className="block">
+                    <Button className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300">
+                      Sign In
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
