@@ -98,7 +98,7 @@ const ComponentCard = ({ component, onLearnMore, className = "" }: ComponentCard
           className="hover:bg-accent/50 transition-all duration-300"
           onClick={(e) => {
             e.stopPropagation();
-            // Open external documentation
+            window.open(`https://docs.example.com/${component.id}`, '_blank');
           }}
         >
           <ExternalLink className="w-4 h-4" />

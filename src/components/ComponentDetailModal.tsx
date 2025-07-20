@@ -284,11 +284,19 @@ const ComponentDetailModal = ({ component, isOpen, onClose }: ComponentDetailMod
             Close
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.open(`https://docs.example.com/${component.id}`, '_blank')}
+            >
               <ExternalLink className="w-4 h-4 mr-2" />
               Documentation
             </Button>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.open(`https://github.com/example/${component.id}`, '_blank')}
+            >
               <Code className="w-4 h-4 mr-2" />
               GitHub
             </Button>
