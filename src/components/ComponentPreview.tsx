@@ -321,7 +321,7 @@ export function NotificationCards() {
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 ${category.color} rounded-lg flex items-center justify-center`}>
-                    <Icon className="w-4 h-4 text-white" />
+                    <Icon className="w-4 h-4 text-background" />
                   </div>
                   <div>
                     <h4 className="font-medium text-sm">{example.name}</h4>
