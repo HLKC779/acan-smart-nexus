@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import AIChat from "./pages/AIChat";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import AgenticFrameworks from "./pages/components/AgenticFrameworks";
+import MemorySystem from "./pages/components/MemorySystem";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
               } 
             />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/components/agentic-frameworks" element={<AgenticFrameworks />} />
+            <Route path="/components/memory-system" element={<MemorySystem />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,12 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ComponentCard from "./ComponentCard";
-import ComponentDetailModal from "./ComponentDetailModal";
 import ComponentFilters from "./ComponentFilters";
 import { componentsData, ComponentData } from "@/data/componentData";
 
 const ComponentsGrid = () => {
-  const [selectedComponent, setSelectedComponent] = useState<ComponentData | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -23,14 +22,28 @@ const ComponentsGrid = () => {
     return matchesSearch && matchesColor;
   });
 
-  const handleLearnMore = (component: ComponentData) => {
-    setSelectedComponent(component);
-    setIsModalOpen(true);
+  // Component ID to route mapping
+  const componentRoutes: Record<string, string> = {
+    'agentic-frameworks': '/components/agentic-frameworks',
+    'memory-system': '/components/memory-system',
+    'tool-integration': '/components/tool-integration',
+    'reasoning-frameworks': '/components/reasoning-frameworks',
+    'knowledge-base': '/components/knowledge-base',
+    'execution-engine': '/components/execution-engine',
+    'monitoring-governance': '/components/monitoring-governance',
+    'deployment-orchestration': '/components/deployment-orchestration',
+    'testing-validation': '/components/testing-validation',
+    'performance-optimization': '/components/performance-optimization'
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedComponent(null);
+  const handleLearnMore = (component: ComponentData) => {
+    const route = componentRoutes[component.id];
+    if (route) {
+      navigate(route);
+    } else {
+      // Fallback for components without dedicated pages
+      navigate(`/components/${component.id}`);
+    }
   };
 
   return (
@@ -92,13 +105,6 @@ const ComponentsGrid = () => {
           </div>
         )}
       </div>
-
-      {/* Component Detail Modal */}
-      <ComponentDetailModal
-        component={selectedComponent}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-      />
     </section>
   );
 };
