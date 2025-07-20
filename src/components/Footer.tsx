@@ -112,7 +112,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © {currentYear} AI Agent Systems. All rights reserved.
+            © {currentYear} Cuong Lam Kim Huynh. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors duration-300 text-sm">
