@@ -86,67 +86,67 @@ const ExamplesSection = () => {
   const componentInfo = {
     'Cloud-Edge Architecture': {
       icon: Cloud,
-      url: 'https://docs.lovable.dev/user-guides/quickstart',
+      url: 'https://en.wikipedia.org/wiki/Edge_computing',
       description: 'Hybrid computing architecture that seamlessly distributes workloads between cloud and edge devices for optimal performance and low latency.',
       features: ['Edge Processing', 'Cloud Coordination', 'Load Balancing', 'Real-time Sync']
     },
     'Ethical Framework': {
       icon: Shield,
-      url: 'https://docs.lovable.dev/faq',
+      url: 'https://en.wikipedia.org/wiki/Ethics_of_artificial_intelligence',
       description: 'Comprehensive ethical decision-making system that ensures AI agents make responsible choices aligned with human values and societal norms.',
       features: ['Bias Detection', 'Fair Decision Making', 'Transparency', 'Accountability']
     },
     'Real-time Processing': {
       icon: Gauge,
-      url: 'https://docs.lovable.dev/user-guides/messaging-limits',
+      url: 'https://en.wikipedia.org/wiki/Real-time_computing',
       description: 'Advanced processing engine capable of handling real-time data streams with ultra-low latency and high throughput requirements.',
       features: ['Stream Processing', 'Low Latency', 'High Throughput', 'Real-time Analytics']
     },
     'Quantum Optimization': {
       icon: Cpu,
-      url: 'https://www.youtube.com/watch?v=9KHLTZaJcR8&list=PLbVHz4urQBZkJiAWdG8HWoJTdgEysigIO',
+      url: 'https://en.wikipedia.org/wiki/Quantum_optimization_algorithms',
       description: 'Quantum-inspired optimization algorithms for solving complex computational problems with unprecedented efficiency.',
       features: ['Complex Problem Solving', 'Resource Optimization', 'Parallel Processing', 'Enhanced Performance']
     },
     'Multi-Modal Interface': {
       icon: Brain,
-      url: 'https://discord.com/channels/1119885301872070706/1280461670979993613',
+      url: 'https://en.wikipedia.org/wiki/Multimodal_interaction',
       description: 'Advanced interface system that processes and understands multiple types of input including text, voice, images, and sensor data.',
       features: ['Text Processing', 'Voice Recognition', 'Image Analysis', 'Sensor Integration']
     },
     'Neuro-Symbolic Integration': {
       icon: Brain,
-      url: 'https://docs.lovable.dev/',
+      url: 'https://en.wikipedia.org/wiki/Neuro-symbolic_AI',
       description: 'Hybrid AI approach combining neural networks with symbolic reasoning for enhanced understanding and explainability.',
       features: ['Neural Networks', 'Symbolic Reasoning', 'Knowledge Graphs', 'Explainable AI']
     },
     'Distributed Cognitive Engines': {
       icon: Brain,
-      url: 'https://docs.lovable.dev/user-guides/quickstart',
+      url: 'https://en.wikipedia.org/wiki/Distributed_artificial_intelligence',
       description: 'Distributed AI processing engines that enable intelligent decision-making across multiple nodes.',
       features: ['Distributed Processing', 'Cognitive Computing', 'Scalable Intelligence', 'Multi-node Coordination']
     },
     'Adaptive Task Decomposition': {
       icon: Brain,
-      url: 'https://docs.lovable.dev/',
+      url: 'https://en.wikipedia.org/wiki/Task_analysis',
       description: 'Intelligent system that breaks down complex tasks into manageable components automatically.',
       features: ['Task Analysis', 'Adaptive Planning', 'Resource Allocation', 'Dynamic Optimization']
     },
     'Federated Learning': {
       icon: Shield,
-      url: 'https://docs.lovable.dev/faq',
+      url: 'https://en.wikipedia.org/wiki/Federated_learning',
       description: 'Privacy-preserving machine learning that trains models across distributed data sources.',
       features: ['Privacy Protection', 'Distributed Training', 'Data Security', 'Collaborative Learning']
     },
     'Ethical Reasoning': {
       icon: Shield,
-      url: 'https://docs.lovable.dev/faq',
+      url: 'https://plato.stanford.edu/entries/reasoning-moral/',
       description: 'Advanced reasoning system that evaluates decisions based on ethical principles.',
       features: ['Moral Evaluation', 'Decision Ethics', 'Value Alignment', 'Responsible AI']
     },
     'Real-time Adaptation': {
       icon: Gauge,
-      url: 'https://docs.lovable.dev/user-guides/messaging-limits',
+      url: 'https://en.wikipedia.org/wiki/Adaptive_system',
       description: 'Dynamic system adaptation based on real-time environmental changes and requirements.',
       features: ['Environment Monitoring', 'Dynamic Adjustment', 'Performance Optimization', 'Reactive Systems']
     }
