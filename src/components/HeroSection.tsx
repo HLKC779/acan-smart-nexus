@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Bot } from "lucide-react";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onExploreClick: () => void;
+  onViewComponentsClick: () => void;
+}
+
+const HeroSection = ({ onExploreClick, onViewComponentsClick }: HeroSectionProps) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden">
       {/* Background animated elements */}
@@ -38,6 +43,7 @@ const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{animationDelay: '0.4s'}}>
           <Button 
             size="lg" 
+            onClick={onExploreClick}
             className="bg-gradient-primary hover:shadow-glow transition-all duration-300 text-lg px-8 py-4 h-auto font-medium"
           >
             Explore Architecture
@@ -46,6 +52,7 @@ const HeroSection = () => {
           <Button 
             variant="outline" 
             size="lg"
+            onClick={onViewComponentsClick}
             className="border-border hover:bg-accent/50 text-lg px-8 py-4 h-auto font-medium transition-all duration-300"
           >
             View Components

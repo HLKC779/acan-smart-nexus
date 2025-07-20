@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, BookOpen } from "lucide-react";
 
-const CTASection = () => {
+interface CTASectionProps {
+  onGetStartedClick: () => void;
+  onDocumentationClick: () => void;
+}
+
+const CTASection = ({ onGetStartedClick, onDocumentationClick }: CTASectionProps) => {
   return (
     <section className="py-24 px-6 bg-gradient-to-br from-accent/10 via-background to-primary/5">
       <div className="max-w-4xl mx-auto text-center">
@@ -23,6 +28,7 @@ const CTASection = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
             size="lg" 
+            onClick={onGetStartedClick}
             className="bg-gradient-primary hover:shadow-glow transition-all duration-300 text-lg px-8 py-4 h-auto font-medium group"
           >
             Get Started
@@ -31,6 +37,7 @@ const CTASection = () => {
           <Button 
             variant="outline" 
             size="lg"
+            onClick={() => window.open('https://github.com', '_blank')}
             className="border-border hover:bg-accent/50 text-lg px-8 py-4 h-auto font-medium transition-all duration-300"
           >
             <Github className="mr-2 w-5 h-5" />
@@ -39,6 +46,7 @@ const CTASection = () => {
           <Button 
             variant="outline" 
             size="lg"
+            onClick={onDocumentationClick}
             className="border-border hover:bg-accent/50 text-lg px-8 py-4 h-auto font-medium transition-all duration-300"
           >
             <BookOpen className="mr-2 w-5 h-5" />
