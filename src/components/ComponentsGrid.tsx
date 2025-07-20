@@ -47,7 +47,7 @@ const ComponentsGrid = () => {
   };
 
   return (
-    <section className="py-24 px-6 bg-background relative overflow-hidden">
+    <section className="py-24 px-6 bg-background relative overflow-hidden" data-component="components-grid">{/* Force refresh */}
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-mesh opacity-30"></div>
       <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-agent-blue/20 to-transparent"></div>
