@@ -14,10 +14,14 @@ import {
   ArrowRight,
   Lightbulb,
   Target,
-  Cpu
+  Cpu,
+  Zap,
+  Settings
 } from "lucide-react";
 import { ComponentData } from "@/data/componentData";
 import { useToast } from "@/hooks/use-toast";
+import CodePlayground from "./CodePlayground";
+import ComponentPreview from "./ComponentPreview";
 
 interface ComponentDetailModalProps {
   component: ComponentData | null;
@@ -102,12 +106,13 @@ const ComponentDetailModal = ({ component, isOpen, onClose }: ComponentDetailMod
 
         <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="architecture">Architecture</TabsTrigger>
-              <TabsTrigger value="code">Code Example</TabsTrigger>
+              <TabsTrigger value="code">Code</TabsTrigger>
+              <TabsTrigger value="playground">Playground</TabsTrigger>
               <TabsTrigger value="getting-started">Get Started</TabsTrigger>
-              <TabsTrigger value="demo">Interactive Demo</TabsTrigger>
+              <TabsTrigger value="demo">Examples</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -231,6 +236,16 @@ const ComponentDetailModal = ({ component, isOpen, onClose }: ComponentDetailMod
               </Card>
             </TabsContent>
 
+            <TabsContent value="playground" className="space-y-6">
+              <CodePlayground
+                title={component.title}
+                initialCode={component.codeExample}
+                language="python"
+                componentType="typescript"
+                dependencies={["@langchain/core", "@langchain/community", "openai"]}
+              />
+            </TabsContent>
+
             <TabsContent value="getting-started" className="space-y-6">
               <Card className="p-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
@@ -239,8 +254,8 @@ const ComponentDetailModal = ({ component, isOpen, onClose }: ComponentDetailMod
                 </h3>
                 <div className="space-y-4">
                   {component.gettingStarted.map((step, index) => (
-                    <div key={index} className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
-                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-background font-semibold text-sm">
+                    <div key={index} className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg hover:bg-muted/40 transition-colors">
+                      <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-background font-semibold text-sm">
                         {index + 1}
                       </div>
                       <div>
@@ -250,31 +265,98 @@ const ComponentDetailModal = ({ component, isOpen, onClose }: ComponentDetailMod
                     </div>
                   ))}
                 </div>
+                
+                {/* Quick Actions */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-agent-blue/10 to-agent-cyan/10 rounded-lg border border-agent-blue/20">
+                  <h4 className="font-semibold mb-3 flex items-center">
+                    <Zap className="w-4 h-4 mr-2 text-agent-blue" />
+                    Quick Actions
+                  </h4>
+                  <div className="flex flex-wrap gap-3">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="hover:bg-agent-blue/10"
+                      onClick={() => copyToClipboard(component.codeExample)}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Code
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="hover:bg-agent-green/10"
+                      onClick={() => window.open(`https://codesandbox.io/s/new`, '_blank')}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Try Online
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="hover:bg-agent-purple/10"
+                      onClick={() => window.open(`https://github.com/templates/${component.id}`, '_blank')}
+                    >
+                      <Code className="w-4 h-4 mr-2" />
+                      Template
+                    </Button>
+                  </div>
+                </div>
               </Card>
             </TabsContent>
 
             <TabsContent value="demo" className="space-y-6">
-              <Card className="p-6 text-center">
-                <div className={`w-16 h-16 ${colors.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4`}>
-                  <Play className={`w-8 h-8 ${colors.iconColor}`} />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Interactive Demo</h3>
-                <p className="text-muted-foreground mb-6">
-                  Try out {component.title} with our interactive demonstration
-                </p>
-                <div className="space-y-4">
-                  <Button 
-                    onClick={handleStartDemo}
-                    className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Interactive Demo
-                  </Button>
-                  <div className="text-sm text-muted-foreground">
-                    Demo environment will open in a new window
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Live Examples */}
+                <Card className="p-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                    <Play className="w-5 h-5 mr-2 text-primary" />
+                    Live Examples
+                  </h3>
+                  <ComponentPreview />
+                </Card>
+
+                {/* Interactive Demo */}
+                <Card className="p-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                    <Settings className="w-5 h-5 mr-2 text-primary" />
+                    Interactive Demo
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-gradient-to-br from-background via-muted/10 to-background border border-border/50 rounded-lg min-h-[300px] flex items-center justify-center">
+                      <div className="text-center">
+                        <div className={`w-16 h-16 ${colors.iconBg} rounded-2xl flex items-center justify-center mx-auto mb-4 animate-glow-pulse`}>
+                          <component.icon className={`w-8 h-8 ${colors.iconColor}`} />
+                        </div>
+                        <h4 className="text-lg font-semibold mb-2">{component.title} Demo</h4>
+                        <p className="text-muted-foreground mb-4 text-sm">
+                          Interactive demonstration of {component.title} capabilities
+                        </p>
+                        <Button 
+                          onClick={handleStartDemo}
+                          className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          Launch Demo
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Demo Features */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Demo Features:</h4>
+                      <div className="grid grid-cols-1 gap-2">
+                        {component.features.slice(0, 3).map((feature, index) => (
+                          <div key={index} className="flex items-center text-sm">
+                            <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                            <span className="text-muted-foreground">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
