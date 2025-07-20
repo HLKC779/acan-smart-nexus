@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Building2, 
   Stethoscope, 
@@ -12,7 +13,10 @@ import {
   Users,
   Brain,
   Shield,
-  Zap
+  Zap,
+  Cloud,
+  Cpu,
+  Gauge
 } from "lucide-react";
 
 const useCases = [
@@ -73,9 +77,58 @@ const colorMap = {
 
 const ExamplesSection = () => {
   const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleLearnMore = (useCaseId: string) => {
     setSelectedUseCase(selectedUseCase === useCaseId ? null : useCaseId);
+  };
+
+  const componentInfo = {
+    'Cloud-Edge Architecture': {
+      icon: Cloud,
+      description: 'Hybrid computing architecture that seamlessly distributes workloads between cloud and edge devices for optimal performance and low latency.',
+      features: ['Edge Processing', 'Cloud Coordination', 'Load Balancing', 'Real-time Sync']
+    },
+    'Ethical Framework': {
+      icon: Shield,
+      description: 'Comprehensive ethical decision-making system that ensures AI agents make responsible choices aligned with human values and societal norms.',
+      features: ['Bias Detection', 'Fair Decision Making', 'Transparency', 'Accountability']
+    },
+    'Real-time Processing': {
+      icon: Gauge,
+      description: 'Advanced processing engine capable of handling real-time data streams with ultra-low latency and high throughput requirements.',
+      features: ['Stream Processing', 'Low Latency', 'High Throughput', 'Real-time Analytics']
+    },
+    'Quantum Optimization': {
+      icon: Cpu,
+      description: 'Quantum-inspired optimization algorithms for solving complex computational problems with unprecedented efficiency.',
+      features: ['Complex Problem Solving', 'Resource Optimization', 'Parallel Processing', 'Enhanced Performance']
+    },
+    'Multi-Modal Interface': {
+      icon: Brain,
+      description: 'Advanced interface system that processes and understands multiple types of input including text, voice, images, and sensor data.',
+      features: ['Text Processing', 'Voice Recognition', 'Image Analysis', 'Sensor Integration']
+    },
+    'Neuro-Symbolic Integration': {
+      icon: Brain,
+      description: 'Hybrid AI approach combining neural networks with symbolic reasoning for enhanced understanding and explainability.',
+      features: ['Neural Networks', 'Symbolic Reasoning', 'Knowledge Graphs', 'Explainable AI']
+    }
+  };
+
+  const handleComponentClick = (componentName: string) => {
+    const info = componentInfo[componentName as keyof typeof componentInfo];
+    if (info) {
+      toast({
+        title: componentName,
+        description: info.description,
+      });
+    } else {
+      toast({
+        title: componentName,
+        description: `Learn more about ${componentName} - a core component of our AI agent system.`,
+      });
+    }
   };
 
   return (
@@ -144,15 +197,17 @@ const ExamplesSection = () => {
                       <Brain className="w-4 h-4 mr-2 text-primary" />
                       Core Components
                     </h4>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {useCase.components.map((component, idx) => (
-                        <Badge 
-                          key={idx} 
-                          variant="outline" 
-                          className="text-xs bg-primary/10 text-primary border-primary/20"
+                        <Button
+                          key={idx}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleComponentClick(component)}
+                          className="text-xs h-7 px-3 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 hover:border-primary/30 transition-all duration-200 hover:scale-105"
                         >
                           {component}
-                        </Badge>
+                        </Button>
                       ))}
                     </div>
                   </div>
