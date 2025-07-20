@@ -334,12 +334,45 @@ const AIChat = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a valid image file (JPG, PNG, WebP, or GIF)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({
+          title: "File Too Large",
+          description: "Please upload an image smaller than 10MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setSelectedFile(file);
       toast({
-        title: "File Selected",
-        description: `${file.name} is ready to be processed`,
+        title: "Image Selected",
+        description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB) is ready for analysis`,
       });
     }
+    
+    // Reset the input value to allow selecting the same file again
+    event.target.value = '';
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    toast({
+      title: "File Removed",
+      description: "Image has been removed",
+    });
   };
 
   const getCapabilityColor = (capability: string) => {
@@ -554,9 +587,10 @@ const AIChat = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedFile(null)}
+                      onClick={removeSelectedFile}
+                      className="text-muted-foreground hover:text-destructive"
                     >
-                      ×
+                      Remove
                     </Button>
                   </div>
                 )}
@@ -603,7 +637,7 @@ const AIChat = () => {
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
         onChange={handleFileSelect}
       />
     </div>
