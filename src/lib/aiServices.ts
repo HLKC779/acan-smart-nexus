@@ -1,4 +1,5 @@
 import { useToast } from "@/hooks/use-toast";
+import { RAGService } from "./ragService";
 
 // ElevenLabs Text-to-Speech Service
 export class ElevenLabsService {
@@ -266,6 +267,7 @@ export class VoiceRecordingService {
 // AI Chat Service (GPT-like responses)
 export class AIChatService {
   private responseCache: Map<string, string> = new Map();
+  private ragService = RAGService.getInstance();
   
   // Analyze user intent regardless of selected capability
   private analyzeIntent(message: string): string {
@@ -297,8 +299,73 @@ export class AIChatService {
     
     return 'default';
   }
+
+  // Check if message should use RAG
+  private shouldUseRAG(message: string): boolean {
+    const lowerMessage = message.toLowerCase();
+    
+    // Questions that might benefit from knowledge base
+    const ragKeywords = [
+      'tell me about', 'what is', 'explain', 'how does', 'define',
+      'describe', 'what are', 'examples of', 'compared to',
+      'difference between', 'help me understand', 'learn about'
+    ];
+    
+    return ragKeywords.some(keyword => lowerMessage.includes(keyword));
+  }
+
+  // Generate response using RAG
+  private async generateRAGResponse(message: string): Promise<string> {
+    try {
+      console.log('Using RAG for message:', message);
+      
+      const ragResult = await this.ragService.chatWithRAG(message);
+      
+      if ('error' in ragResult) {
+        console.error('RAG error, falling back to standard response:', ragResult.error);
+        return this.generateStandardResponse(message);
+      }
+      
+      // Enhance RAG response with additional context
+      let response = ragResult.response;
+      
+      if (ragResult.contextUsed && ragResult.sources.length > 0) {
+        response += `\n\n📚 **Sources from your knowledge base:**\n`;
+        ragResult.sources.forEach((source, index) => {
+          response += `${index + 1}. ${source.documentTitle}\n`;
+        });
+        
+        response += `\n*This response was enhanced using ${ragResult.ragResults} relevant document${ragResult.ragResults !== 1 ? 's' : ''} from your knowledge base.*`;
+      } else {
+        response += `\n\n💡 *No relevant documents found in your knowledge base. Consider adding relevant documents to improve future responses.*`;
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('RAG generation failed:', error);
+      return this.generateStandardResponse(message);
+    }
+  }
+
+  // Generate standard response without RAG
+  private generateStandardResponse(message: string): string {
+    const standardResponses = [
+      `🤖 **AI Response**\n\nI understand you're asking about: "${message}"\n\nI'd be happy to help! However, I notice you don't have relevant documents in your knowledge base for this topic. You can:\n\n• Add documents to your knowledge base for more personalized responses\n• Ask me to research current information\n• Specify what type of assistance you need\n\n**Available capabilities:**\n• Research and information gathering\n• Code generation and technical help\n• Creative content writing\n• Analysis and brainstorming`,
+      
+      `💭 **Intelligent Analysis**\n\nRegarding: "${message}"\n\nI can provide general assistance, but for more specific and personalized responses, consider:\n\n• **Building your knowledge base** - Add relevant documents\n• **Using specific AI capabilities** - Select from the sidebar\n• **Providing more context** - Additional details help me assist better\n\nI'm ready to help with research, coding, creative writing, and more!`
+    ];
+    
+    return standardResponses[Math.floor(Math.random() * standardResponses.length)];
+  }
   
   async generateResponse(message: string, capability: string, hasAttachment: boolean = false): Promise<string> {
+    // Check if this should use RAG
+    const shouldUseRAG = capability === 'chat' || capability === 'research' || this.shouldUseRAG(message);
+    
+    if (shouldUseRAG) {
+      return this.generateRAGResponse(message);
+    }
+
     // Analyze user intent and suggest better capability if needed
     const detectedIntent = this.analyzeIntent(message);
     const shouldUseDetectedIntent = detectedIntent !== 'default' && detectedIntent !== capability;

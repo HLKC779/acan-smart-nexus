@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { APIKeyManager } from "@/components/APIKeyManager";
+import RAGManager from "@/components/RAGManager";
 import { 
   ElevenLabsService, 
   ImageAnalysisService, 
@@ -42,7 +43,8 @@ import {
   Search,
   Lightbulb,
   Cpu,
-  ArrowLeft
+  ArrowLeft,
+  Database
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -67,7 +69,7 @@ const AIChat = () => {
     {
       id: '1',
       type: 'assistant',
-      content: 'Hello! I\'m your AI assistant with advanced capabilities. I can help you with text-to-speech, image generation, video creation, image analysis, and much more. What would you like to create today?',
+      content: 'Hello! I\'m your AI assistant with advanced RAG capabilities. I can help you with:\n\n🧠 **Smart Chat with RAG** - I can now use your knowledge base to provide contextual responses\n📚 **Knowledge Base Management** - Add documents to enhance my understanding\n🎵 **Text-to-Speech** - Convert text to natural speech\n🎨 **Text-to-Image** - Generate stunning images\n🎬 **Image-to-Video** - Create videos from images\n👁️ **Image Analysis** - Analyze and describe images\n💻 **Code Generation** - Write and debug code\n\nWhat would you like to create or learn about today?',
       timestamp: new Date(),
       aiTask: 'greeting'
     }
@@ -95,7 +97,8 @@ const AIChat = () => {
   const { toast } = useToast();
 
   const aiCapabilities = [
-    { id: 'chat', label: 'Smart Chat', icon: MessageSquare, color: 'blue' },
+    { id: 'chat', label: 'Smart Chat (RAG)', icon: MessageSquare, color: 'blue' },
+    { id: 'rag-manager', label: 'Knowledge Base', icon: Database, color: 'purple' },
     { id: 'text-to-speech', label: 'Text-to-Speech', icon: Mic, color: 'green' },
     { id: 'text-to-image', label: 'Text-to-Image', icon: Image, color: 'purple' },
     { id: 'image-to-video', label: 'Image-to-Video', icon: Video, color: 'red' },
@@ -108,6 +111,9 @@ const AIChat = () => {
   ];
 
   const quickPrompts = [
+    "Tell me about AI agent frameworks",
+    "What are the key components of memory systems?",
+    "Explain cloud-edge architecture",
     "Generate an image of a futuristic city",
     "Convert this text to speech",
     "Analyze this image for me", 
@@ -484,6 +490,26 @@ const AIChat = () => {
 
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
+            {selectedCapability === 'rag-manager' ? (
+              <Card className="h-[calc(100vh-200px)]">
+                <CardHeader className="border-b">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="w-5 h-5" />
+                        Knowledge Base Manager
+                        <Badge variant="secondary" className="bg-purple/10 text-purple">
+                          RAG System
+                        </Badge>
+                      </CardTitle>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 h-[calc(100vh-280px)] overflow-y-auto">
+                  <RAGManager />
+                </CardContent>
+              </Card>
+            ) : (
             <Card className="h-[calc(100vh-200px)]">
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
@@ -628,6 +654,7 @@ const AIChat = () => {
                 </div>
               </div>
             </Card>
+            )}
           </div>
         </div>
       </div>
