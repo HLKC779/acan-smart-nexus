@@ -141,6 +141,25 @@ const AIChat = () => {
   const handleSendMessage = async () => {
     if (!currentMessage.trim() && !selectedFile) return;
 
+    // Validate input based on capability
+    if (selectedCapability === 'text-to-speech' && !currentMessage.trim()) {
+      toast({
+        title: "Input Required",
+        description: "Please enter text to convert to speech",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedCapability === 'image-analysis' && !selectedFile) {
+      toast({
+        title: "Image Required",
+        description: "Please upload an image for analysis",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -173,11 +192,31 @@ const AIChat = () => {
 
       let audioUrl: string | undefined;
 
-      // Handle specific AI capabilities
-      if (selectedCapability === 'text-to-speech' && elevenLabsService) {
+      // Handle specific AI capabilities with better error handling
+      if (selectedCapability === 'text-to-speech') {
+        if (!elevenLabsService) {
+          toast({
+            title: "API Key Required",
+            description: "Please configure your ElevenLabs API key in settings",
+            variant: "destructive",
+          });
+          setIsProcessing(false);
+          return;
+        }
+
         try {
+          toast({
+            title: "Generating Speech",
+            description: "Converting text to speech...",
+          });
+
           const audioBlob = await elevenLabsService.textToSpeech(currentText);
           audioUrl = URL.createObjectURL(audioBlob);
+          
+          toast({
+            title: "Speech Generated",
+            description: "Text has been converted to speech successfully",
+          });
           
           if (autoSpeak) {
             await audioPlayerService.playAudio(audioBlob);
@@ -186,20 +225,28 @@ const AIChat = () => {
           console.error("Text-to-speech error:", error);
           toast({
             title: "Text-to-Speech Error",
-            description: "Please check your ElevenLabs API key",
+            description: error instanceof Error ? error.message : "Please check your ElevenLabs API key",
             variant: "destructive",
           });
         }
       } else if (selectedCapability === 'image-analysis' && currentFile) {
         try {
+          toast({
+            title: "Analyzing Image",
+            description: "Processing image with AI vision models...",
+          });
+
           const analysisResult = await imageAnalysisService.analyzeImage(currentFile);
-          // Update the response with actual analysis
-          const updatedResponse = aiResponseContent + "\n\n" + analysisResult;
           
+          toast({
+            title: "Analysis Complete",
+            description: "Image has been analyzed successfully",
+          });
+
           const aiResponse: Message = {
             id: (Date.now() + 1).toString(),
             type: 'assistant',
-            content: updatedResponse,
+            content: analysisResult,
             timestamp: new Date(),
             aiTask: selectedCapability,
             audioUrl
@@ -211,7 +258,7 @@ const AIChat = () => {
           console.error("Image analysis error:", error);
           toast({
             title: "Image Analysis Error",
-            description: "Failed to analyze image. Please try again.",
+            description: error instanceof Error ? error.message : "Failed to analyze image",
             variant: "destructive",
           });
         }
@@ -230,7 +277,7 @@ const AIChat = () => {
       console.error("AI response error:", error);
       toast({
         title: "AI Error",
-        description: "Failed to generate response. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate response",
         variant: "destructive",
       });
     } finally {

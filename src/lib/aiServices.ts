@@ -6,12 +6,34 @@ export class ElevenLabsService {
   private voiceId: string = "9BWtsMINqrJLrRacOk9x"; // Aria voice
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
+    this.apiKey = apiKey.trim();
+  }
+
+  async validateApiKey(): Promise<boolean> {
+    try {
+      const response = await fetch("https://api.elevenlabs.io/v1/voices", {
+        headers: {
+          "xi-api-key": this.apiKey,
+        },
+      });
+      return response.ok;
+    } catch (error) {
+      console.error("API key validation error:", error);
+      return false;
+    }
   }
 
   async textToSpeech(text: string): Promise<Blob> {
+    if (!this.apiKey) {
+      throw new Error("ElevenLabs API key is required");
+    }
+
+    // Limit text length to prevent API errors
+    const maxLength = 2000;
+    const processedText = text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+
     try {
-      const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + this.voiceId, {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${this.voiceId}`, {
         method: "POST",
         headers: {
           "Accept": "audio/mpeg",
@@ -19,20 +41,30 @@ export class ElevenLabsService {
           "xi-api-key": this.apiKey,
         },
         body: JSON.stringify({
-          text: text,
-          model_id: "eleven_multilingual_v2",
+          text: processedText,
+          model_id: "eleven_turbo_v2_5",
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5
+            stability: 0.7,
+            similarity_boost: 0.8,
+            style: 0.2,
+            use_speaker_boost: true
           }
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`ElevenLabs API error: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
       }
 
-      return await response.blob();
+      const audioBlob = await response.blob();
+      
+      // Verify the blob is valid audio
+      if (audioBlob.size === 0) {
+        throw new Error("Received empty audio response");
+      }
+
+      return audioBlob;
     } catch (error) {
       console.error("Text-to-speech error:", error);
       throw error;
@@ -43,40 +75,81 @@ export class ElevenLabsService {
 // Image Analysis using HuggingFace Transformers
 export class ImageAnalysisService {
   private pipeline: any = null;
+  private isInitializing: boolean = false;
 
   async initialize() {
-    if (this.pipeline) return;
+    if (this.pipeline || this.isInitializing) return;
+    
+    this.isInitializing = true;
     
     try {
-      const { pipeline } = await import('@huggingface/transformers');
-      this.pipeline = await pipeline('image-classification', 'google/vit-base-patch16-224', {
-        device: 'webgpu',
-      });
+      const { pipeline, env } = await import('@huggingface/transformers');
+      
+      // Configure transformers.js
+      env.allowLocalModels = false;
+      env.useBrowserCache = true;
+      
+      // Try WebGPU first, fallback to CPU
+      try {
+        this.pipeline = await pipeline('image-classification', 'Xenova/vit-base-patch16-224', {
+          device: 'webgpu',
+        });
+        console.log("Image analysis initialized with WebGPU");
+      } catch (webgpuError) {
+        console.warn("WebGPU not available, falling back to CPU");
+        this.pipeline = await pipeline('image-classification', 'Xenova/vit-base-patch16-224');
+        console.log("Image analysis initialized with CPU");
+      }
     } catch (error) {
-      console.warn("WebGPU not available, falling back to CPU");
-      const { pipeline } = await import('@huggingface/transformers');
-      this.pipeline = await pipeline('image-classification', 'google/vit-base-patch16-224');
+      console.error("Failed to initialize image analysis:", error);
+      throw new Error("Failed to initialize image analysis model");
+    } finally {
+      this.isInitializing = false;
     }
   }
 
   async analyzeImage(imageFile: File): Promise<string> {
+    // Validate file
+    if (!imageFile.type.startsWith('image/')) {
+      throw new Error("Please provide a valid image file");
+    }
+
+    // Check file size (max 10MB)
+    if (imageFile.size > 10 * 1024 * 1024) {
+      throw new Error("Image file too large. Please use images smaller than 10MB");
+    }
+
     await this.initialize();
     
     try {
       const imageUrl = URL.createObjectURL(imageFile);
-      const results = await this.pipeline(imageUrl);
+      
+      // Add timeout for the analysis
+      const analysisPromise = this.pipeline(imageUrl);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Analysis timeout")), 30000)
+      );
+      
+      const results = await Promise.race([analysisPromise, timeoutPromise]);
       
       // Clean up object URL
       URL.revokeObjectURL(imageUrl);
       
-      const analysis = results.slice(0, 3).map((result: any, index: number) => 
-        `${index + 1}. ${result.label} (${(result.score * 100).toFixed(1)}% confidence)`
+      if (!results || !Array.isArray(results) || results.length === 0) {
+        throw new Error("No analysis results received");
+      }
+
+      const analysis = results.slice(0, 5).map((result: any, index: number) => 
+        `${index + 1}. **${result.label}** - ${(result.score * 100).toFixed(1)}% confidence`
       ).join('\n');
 
-      return `🔍 **Image Analysis Results:**\n\n${analysis}\n\nI can see this image contains visual elements that match these classifications. The analysis uses advanced computer vision models to identify objects, scenes, and patterns in your image.`;
+      return `🔍 **Image Analysis Complete**\n\n**Top Classifications:**\n${analysis}\n\n**Analysis Details:**\nThis image has been processed using advanced computer vision models that can identify objects, scenes, activities, and visual patterns. The confidence scores indicate how certain the AI is about each classification.`;
     } catch (error) {
       console.error("Image analysis error:", error);
-      throw new Error("Failed to analyze image. Please try again.");
+      if (error instanceof Error && error.message === "Analysis timeout") {
+        throw new Error("Image analysis took too long. Please try with a smaller image.");
+      }
+      throw new Error("Failed to analyze image. Please try again with a different image.");
     }
   }
 }
@@ -134,9 +207,18 @@ export class VoiceRecordingService {
 
 // AI Chat Service (GPT-like responses)
 export class AIChatService {
+  private responseCache: Map<string, string> = new Map();
   
   async generateResponse(message: string, capability: string, hasAttachment: boolean = false): Promise<string> {
-    // This is a sophisticated response generator that provides contextual AI responses
+    // Create cache key
+    const cacheKey = `${capability}-${message.substring(0, 50)}-${hasAttachment}`;
+    
+    // Check cache first
+    if (this.responseCache.has(cacheKey)) {
+      return this.responseCache.get(cacheKey)!;
+    }
+
+    // Enhanced response generator with better context awareness
     const responses = {
       'text-to-speech': [
         `🎵 **Text-to-Speech Conversion Complete**\n\nI've converted your text "${message}" into natural-sounding speech using advanced neural voice synthesis. The audio features:\n\n• Natural intonation and rhythm\n• Clear pronunciation\n• Human-like speech patterns\n\nYou can play the generated audio using the player below.`,
@@ -183,6 +265,15 @@ export class AIChatService {
 
     const capabilityResponses = responses[capability as keyof typeof responses] || responses.default;
     const randomResponse = capabilityResponses[Math.floor(Math.random() * capabilityResponses.length)];
+    
+    // Cache the response
+    this.responseCache.set(cacheKey, randomResponse);
+    
+    // Limit cache size
+    if (this.responseCache.size > 50) {
+      const firstKey = this.responseCache.keys().next().value;
+      this.responseCache.delete(firstKey);
+    }
     
     return randomResponse;
   }
