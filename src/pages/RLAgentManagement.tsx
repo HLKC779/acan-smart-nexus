@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Brain, TrendingUp, Settings, Activity, Users, Database } from 'lucide-react';
+import { ArrowLeft, Brain, TrendingUp, Settings, Activity, Users, Database, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   ReactFlow,
@@ -222,7 +223,7 @@ const RLAgentManagement = () => {
   const navigate = useNavigate();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedAgent, setSelectedAgent] = useState('agent-1');
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
 
   // Real-time metrics simulation
@@ -548,7 +549,7 @@ const RLAgentManagement = () => {
                 { id: 'recommendation', name: 'Recommendation Agent', performance: 89, status: 'training' },
                 { id: 'optimization', name: 'Optimization Agent', performance: 91, status: 'active' },
               ].map((agent) => (
-                <Card key={agent.id} className={selectedAgent === agent.id ? 'ring-2 ring-primary' : ''}>
+                <Card key={agent.id}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-lg">{agent.name}</CardTitle>
@@ -591,6 +592,111 @@ const RLAgentManagement = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Agent Details Modal */}
+        <Dialog open={!!selectedAgent} onOpenChange={() => setSelectedAgent(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-primary" />
+                {selectedAgent && [
+                  { id: 'navigation', name: 'Navigation Agent', performance: 94, status: 'active' },
+                  { id: 'recommendation', name: 'Recommendation Agent', performance: 89, status: 'training' },
+                  { id: 'optimization', name: 'Optimization Agent', performance: 91, status: 'active' },
+                ].find(agent => agent.id === selectedAgent)?.name} Details
+              </DialogTitle>
+              <DialogDescription>
+                Detailed performance metrics and configuration for this RL agent
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedAgent && (
+              <div className="space-y-6">
+                {/* Performance Overview */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Current Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">
+                        {[
+                          { id: 'navigation', performance: 94 },
+                          { id: 'recommendation', performance: 89 },
+                          { id: 'optimization', performance: 91 },
+                        ].find(agent => agent.id === selectedAgent)?.performance}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">Success Rate</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Training Progress</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-blue-600">1,247</div>
+                      <p className="text-xs text-muted-foreground">Episodes Completed</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Detailed Metrics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Performance Metrics</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Average Reward</span>
+                        <span className="font-medium">+24.3</span>
+                      </div>
+                      <Progress value={75} />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Learning Rate</span>
+                        <span className="font-medium">0.001</span>
+                      </div>
+                      <Progress value={60} />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Exploration Rate</span>
+                        <span className="font-medium">15%</span>
+                      </div>
+                      <Progress value={15} />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-sm">
+                        <span>Last Policy Update</span>
+                        <span className="text-muted-foreground">2 minutes ago</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span>Last Training Session</span>
+                        <span className="text-muted-foreground">15 minutes ago</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span>Next Scheduled Training</span>
+                        <span className="text-muted-foreground">In 45 minutes</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
