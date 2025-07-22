@@ -88,6 +88,15 @@ const Navigation = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <Link to="/intelligent-agents">
+              <Button 
+                variant="outline"
+                className="border-green-500/30 text-green-500 hover:bg-green-500/10 hover:border-green-500/50 hover:shadow-glow/50 transition-all duration-300"
+              >
+                <Bot className="w-4 h-4 mr-2" />
+                Smart Agents
+              </Button>
+            </Link>
             <Link to="/rl-agent-management">
               <Button 
                 variant="outline"
@@ -165,6 +174,15 @@ const Navigation = () => {
                 </button>
               ))}
               <div className="pt-2 space-y-2">
+                <Link to="/intelligent-agents" className="block">
+                  <Button 
+                    variant="outline"
+                    className="w-full border-green-500/20 text-green-500 hover:bg-green-500/10"
+                  >
+                    <Bot className="w-4 h-4 mr-2" />
+                    Smart Agents
+                  </Button>
+                </Link>
                 <Link to="/rl-agent-management" className="block">
                   <Button 
                     variant="outline"
