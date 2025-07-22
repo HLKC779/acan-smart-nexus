@@ -18,12 +18,15 @@ import {
   Node,
   Edge,
   MarkerType,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 // Custom node components for different RL system parts
 const FeedbackAggregatorNode = ({ data }: { data: any }) => (
   <div className="bg-card border-2 border-primary/20 rounded-lg p-3 min-w-[200px]">
+    <Handle type="target" position={Position.Top} className="w-3 h-3" />
     <div className="flex items-center gap-2 mb-2">
       <Activity className="w-4 h-4 text-primary" />
       <span className="font-semibold text-sm">Feedback Aggregator</span>
@@ -34,11 +37,13 @@ const FeedbackAggregatorNode = ({ data }: { data: any }) => (
     <div className="text-xs text-muted-foreground">
       Weight: {data.weight || '0.85'}
     </div>
+    <Handle type="source" position={Position.Bottom} className="w-3 h-3" />
   </div>
 );
 
 const PolicyManagerNode = ({ data }: { data: any }) => (
   <div className="bg-card border-2 border-blue-500/20 rounded-lg p-3 min-w-[200px]">
+    <Handle type="target" position={Position.Top} className="w-3 h-3" />
     <div className="flex items-center gap-2 mb-2">
       <Settings className="w-4 h-4 text-blue-500" />
       <span className="font-semibold text-sm">Policy Manager</span>
@@ -49,11 +54,13 @@ const PolicyManagerNode = ({ data }: { data: any }) => (
     <div className="text-xs text-muted-foreground">
       Rate: {data.rate || '0.001'}
     </div>
+    <Handle type="source" position={Position.Bottom} className="w-3 h-3" />
   </div>
 );
 
 const AgentNode = ({ data }: { data: any }) => (
   <div className="bg-card border-2 border-green-500/20 rounded-lg p-3 min-w-[180px]">
+    <Handle type="target" position={Position.Top} className="w-3 h-3" />
     <div className="flex items-center gap-2 mb-2">
       <Brain className="w-4 h-4 text-green-500" />
       <span className="font-semibold text-sm">{data.name}</span>
@@ -76,6 +83,7 @@ const DataSourceNode = ({ data }: { data: any }) => (
     <div className="text-xs text-muted-foreground">
       Rate: {data.rate || '100ms'}
     </div>
+    <Handle type="source" position={Position.Bottom} className="w-3 h-3" />
   </div>
 );
 
