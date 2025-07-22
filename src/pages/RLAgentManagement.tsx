@@ -332,7 +332,7 @@ const RLAgentManagement = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[600px] border rounded-lg">
+                <div className="h-[600px] border rounded-lg bg-background">
                   <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -342,11 +342,16 @@ const RLAgentManagement = () => {
                     nodeTypes={nodeTypes}
                     fitView
                     attributionPosition="top-right"
-                    style={{ background: 'hsl(var(--background))' }}
                   >
-                    <Background />
-                    <Controls />
-                    <MiniMap />
+                    <Background color="hsl(var(--muted-foreground))" />
+                    <Controls className="[&>button]:bg-card [&>button]:border-border [&>button]:text-foreground" />
+                    <MiniMap 
+                      className="bg-card border border-border"
+                      maskColor="hsl(var(--background) / 0.6)"
+                      nodeColor="hsl(var(--primary))"
+                      nodeStrokeColor="hsl(var(--border))"
+                      nodeBorderRadius={4}
+                    />
                   </ReactFlow>
                 </div>
               </CardContent>
