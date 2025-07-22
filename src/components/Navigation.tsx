@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Bot, Brain, User, LogOut } from "lucide-react";
+import { Menu, X, Bot, Brain, User, LogOut, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -88,6 +88,15 @@ const Navigation = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <Link to="/rl-agent-management">
+              <Button 
+                variant="outline"
+                className="border-purple-500/30 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50 hover:shadow-glow/50 transition-all duration-300"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                RL Agents
+              </Button>
+            </Link>
             <Link to="/ai-chat">
               <Button 
                 variant="outline"
@@ -156,6 +165,15 @@ const Navigation = () => {
                 </button>
               ))}
               <div className="pt-2 space-y-2">
+                <Link to="/rl-agent-management" className="block">
+                  <Button 
+                    variant="outline"
+                    className="w-full border-purple-500/20 text-purple-500 hover:bg-purple-500/10"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    RL Agents
+                  </Button>
+                </Link>
                 <Link to="/ai-chat" className="block">
                   <Button 
                     variant="outline"
