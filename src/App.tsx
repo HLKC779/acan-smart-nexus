@@ -52,8 +52,22 @@ const App = () => (
             <Route path="/components/deployment-orchestration" element={<DeploymentOrchestration />} />
             <Route path="/components/testing-validation" element={<TestingValidation />} />
             <Route path="/components/performance-optimization" element={<PerformanceOptimization />} />
-            <Route path="/rl-agent-management" element={<RLAgentManagement />} />
-            <Route path="/intelligent-agents" element={<IntelligentAgents />} />
+            <Route 
+              path="/rl-agent-management" 
+              element={
+                <ProtectedRoute>
+                  <RLAgentManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/intelligent-agents" 
+              element={
+                <ProtectedRoute>
+                  <IntelligentAgents />
+                </ProtectedRoute>
+              } 
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
