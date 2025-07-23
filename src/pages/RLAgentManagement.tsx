@@ -5,8 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Brain, TrendingUp, Settings, Activity, Users, Database, X } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, Brain, TrendingUp, Settings, Activity, Users, Database, X, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { SystemDiagnostics } from '@/components/SystemDiagnostics';
 import {
   ReactFlow,
   MiniMap,
@@ -221,10 +225,14 @@ const initialEdges: Edge[] = [
 
 const RLAgentManagement = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
+  const [systemStatus, setSystemStatus] = useState<'healthy' | 'warning' | 'error'>('healthy');
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('connected');
+  const [errors, setErrors] = useState<string[]>([]);
 
   // Real-time metrics simulation
   const [metrics, setMetrics] = useState({
@@ -247,31 +255,112 @@ const RLAgentManagement = () => {
     [setEdges]
   );
 
-  // Simulate real-time updates
+  // System health monitoring
+  useEffect(() => {
+    const checkSystemHealth = () => {
+      try {
+        // Simulate health checks
+        const healthScore = Math.random();
+        
+        if (healthScore > 0.8) {
+          setSystemStatus('healthy');
+          setConnectionStatus('connected');
+        } else if (healthScore > 0.5) {
+          setSystemStatus('warning');
+          setConnectionStatus('connected');
+        } else {
+          setSystemStatus('error');
+          setConnectionStatus('disconnected');
+          setErrors(prev => [...prev.slice(-4), `System health degraded at ${new Date().toLocaleTimeString()}`]);
+        }
+      } catch (error) {
+        console.error('Health check failed:', error);
+        setSystemStatus('error');
+        setErrors(prev => [...prev.slice(-4), `Health check failed: ${error}`]);
+      }
+    };
+
+    checkSystemHealth();
+    const healthInterval = setInterval(checkSystemHealth, 10000);
+
+    return () => clearInterval(healthInterval);
+  }, []);
+
+  // Simulate real-time updates with error handling
   useEffect(() => {
     const interval = setInterval(() => {
-      setMetrics(prev => ({
-        ...prev,
-        totalReward: prev.totalReward + Math.random() * 10 - 5,
-        episodeCount: prev.episodeCount + Math.floor(Math.random() * 3),
-        convergenceScore: Math.min(0.99, prev.convergenceScore + Math.random() * 0.01 - 0.005),
-      }));
+      try {
+        setMetrics(prev => ({
+          ...prev,
+          totalReward: prev.totalReward + Math.random() * 10 - 5,
+          episodeCount: prev.episodeCount + Math.floor(Math.random() * 3),
+          convergenceScore: Math.min(0.99, prev.convergenceScore + Math.random() * 0.01 - 0.005),
+        }));
 
-      setFeedbackSources(prev => 
-        prev.map(source => ({
-          ...source,
-          value: Math.max(0, Math.min(100, source.value + Math.random() * 6 - 3)),
-        }))
-      );
+        setFeedbackSources(prev => 
+          prev.map(source => ({
+            ...source,
+            value: Math.max(0, Math.min(100, source.value + Math.random() * 6 - 3)),
+          }))
+        );
+      } catch (error) {
+        console.error('Metrics update failed:', error);
+        setErrors(prev => [...prev.slice(-4), `Metrics update failed: ${error}`]);
+      }
     }, 2000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleStartTraining = () => {
-    setIsTraining(true);
-    setTimeout(() => setIsTraining(false), 5000);
+  const handleStartTraining = async () => {
+    if (!user) {
+      toast.error('Please sign in to start training');
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      setIsTraining(true);
+      toast.success('Training session started');
+      
+      // Simulate training process
+      setTimeout(() => {
+        setIsTraining(false);
+        toast.success('Training session completed successfully');
+      }, 5000);
+    } catch (error) {
+      console.error('Training failed:', error);
+      setIsTraining(false);
+      setErrors(prev => [...prev.slice(-4), `Training failed: ${error}`]);
+      toast.error('Training session failed');
+    }
   };
+
+  const handleRefreshSystem = () => {
+    setConnectionStatus('connecting');
+    setTimeout(() => {
+      setConnectionStatus('connected');
+      setSystemStatus('healthy');
+      setErrors([]);
+      toast.success('System refreshed successfully');
+    }, 1000);
+  };
+
+  const handleClearErrors = () => {
+    setErrors([]);
+    toast.success('Error log cleared');
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-4 h-4 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -301,9 +390,32 @@ const RLAgentManagement = () => {
               <Badge variant={isTraining ? "default" : "secondary"}>
                 {isTraining ? "Training Active" : "Monitoring"}
               </Badge>
+              <Badge 
+                variant={systemStatus === 'healthy' ? 'default' : systemStatus === 'warning' ? 'secondary' : 'destructive'}
+                className="flex items-center gap-1"
+              >
+                {systemStatus === 'healthy' ? (
+                  <CheckCircle className="w-3 h-3" />
+                ) : systemStatus === 'warning' ? (
+                  <AlertTriangle className="w-3 h-3" />
+                ) : (
+                  <X className="w-3 h-3" />
+                )}
+                {systemStatus === 'healthy' ? 'System Healthy' : systemStatus === 'warning' ? 'System Warning' : 'System Error'}
+              </Badge>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefreshSystem}
+                className="flex items-center gap-2"
+                disabled={connectionStatus === 'connecting'}
+              >
+                <RefreshCw className={`w-4 h-4 ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
               <Button 
                 onClick={handleStartTraining} 
-                disabled={isTraining}
+                disabled={isTraining || !user}
                 className="flex items-center gap-2"
               >
                 <TrendingUp className="w-4 h-4" />
@@ -315,12 +427,55 @@ const RLAgentManagement = () => {
       </div>
 
       <div className="container mx-auto px-4 py-6">
+        {/* Error Messages */}
+        {errors.length > 0 && (
+          <Alert className="mb-6 border-destructive/50">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="flex justify-between items-start">
+                <div>
+                  <strong>System Errors ({errors.length}):</strong>
+                  <ul className="mt-1 text-sm">
+                    {errors.slice(-3).map((error, index) => (
+                      <li key={index} className="truncate">• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleClearErrors}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Clear
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Auth Warning */}
+        {!user && (
+          <Alert className="mb-6 border-warning/50">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="flex justify-between items-center">
+                <span>Sign in to access full RL training features and save your progress.</span>
+                <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
+                  Sign In
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs defaultValue="architecture" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="architecture">System Architecture</TabsTrigger>
             <TabsTrigger value="metrics">Performance Metrics</TabsTrigger>
             <TabsTrigger value="feedback">Feedback Sources</TabsTrigger>
             <TabsTrigger value="agents">Agent Management</TabsTrigger>
+            <TabsTrigger value="diagnostics">System Diagnostics</TabsTrigger>
           </TabsList>
 
           {/* System Architecture Tab */}
@@ -590,6 +745,15 @@ const RLAgentManagement = () => {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          {/* System Diagnostics Tab */}
+          <TabsContent value="diagnostics" className="space-y-6">
+            <SystemDiagnostics 
+              nodes={nodes} 
+              edges={edges} 
+              isVisible={true}
+            />
           </TabsContent>
         </Tabs>
 
