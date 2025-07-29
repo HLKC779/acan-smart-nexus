@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { SystemDiagnostics } from '@/components/SystemDiagnostics';
+import { QCTestRunner } from '@/components/QCTestRunner';
 import {
   ReactFlow,
   MiniMap,
@@ -470,12 +471,13 @@ const RLAgentManagement = () => {
         )}
 
         <Tabs defaultValue="architecture" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="architecture">System Architecture</TabsTrigger>
             <TabsTrigger value="metrics">Performance Metrics</TabsTrigger>
             <TabsTrigger value="feedback">Feedback Sources</TabsTrigger>
             <TabsTrigger value="agents">Agent Management</TabsTrigger>
             <TabsTrigger value="diagnostics">System Diagnostics</TabsTrigger>
+            <TabsTrigger value="qc-tests">QC Test Suite</TabsTrigger>
           </TabsList>
 
           {/* System Architecture Tab */}
@@ -753,6 +755,18 @@ const RLAgentManagement = () => {
               nodes={nodes} 
               edges={edges} 
               isVisible={true}
+            />
+          </TabsContent>
+
+          {/* QC Test Suite Tab */}
+          <TabsContent value="qc-tests" className="space-y-6">
+            <QCTestRunner 
+              nodes={nodes} 
+              edges={edges} 
+              onTestComplete={(results) => {
+                console.log('QC Test Results:', results);
+                // Handle test completion
+              }}
             />
           </TabsContent>
         </Tabs>
