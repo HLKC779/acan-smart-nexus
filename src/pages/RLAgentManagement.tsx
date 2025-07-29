@@ -259,13 +259,13 @@ const RLAgentManagement = () => {
   useEffect(() => {
     const checkSystemHealth = () => {
       try {
-        // Simulate health checks
-        const healthScore = Math.random();
+        // Simulate more stable health checks with bias toward healthy state
+        const healthScore = Math.random() * 0.3 + 0.7; // Range: 0.7-1.0 (mostly healthy)
         
-        if (healthScore > 0.8) {
+        if (healthScore > 0.9) {
           setSystemStatus('healthy');
           setConnectionStatus('connected');
-        } else if (healthScore > 0.5) {
+        } else if (healthScore > 0.8) {
           setSystemStatus('warning');
           setConnectionStatus('connected');
         } else {
