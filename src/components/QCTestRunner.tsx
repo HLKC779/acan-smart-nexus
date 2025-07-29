@@ -336,32 +336,41 @@ export const QCTestRunner: React.FC<QCTestRunnerProps> = ({
               return (
                 <div
                   key={test.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  className="group relative flex items-center justify-between p-4 rounded-xl bg-card/50 border border-border/50 hover:border-border transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    {getCategoryIcon(test.category)}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                      {getCategoryIcon(test.category)}
+                    </div>
                     <div>
-                      <div className="font-medium">{test.name}</div>
+                      <div className="font-medium text-foreground">{test.name}</div>
                       <div className="text-sm text-muted-foreground">
                         {test.description}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {result && (
                       <>
-                        <Badge variant="outline" className={getStatusColor(result.status)}>
-                          {result.status}
-                        </Badge>
-                        {result.duration > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            {result.duration.toFixed(0)}ms
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {result.duration > 0 && (
+                            <span className="text-xs text-muted-foreground font-mono">
+                              {result.duration.toFixed(0)}ms
+                            </span>
+                          )}
+                          <Badge 
+                            variant="outline" 
+                            className={`${getStatusColor(result.status)} border-none font-medium`}
+                          >
+                            {result.status}
+                          </Badge>
+                        </div>
                       </>
                     )}
-                    {getStatusIcon(result?.status || 'pending')}
+                    <div className="flex items-center justify-center w-8 h-8">
+                      {getStatusIcon(result?.status || 'pending')}
+                    </div>
                   </div>
                 </div>
               );
