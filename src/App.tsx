@@ -21,6 +21,7 @@ import TestingValidation from "./pages/components/TestingValidation";
 import PerformanceOptimization from "./pages/components/PerformanceOptimization";
 import RLAgentManagement from "./pages/RLAgentManagement";
 import IntelligentAgents from "./pages/IntelligentAgents";
+import Tutorial from "./pages/Tutorial";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/tutorial" element={<Tutorial />} />
             <Route 
               path="/ai-chat" 
               element={

@@ -41,11 +41,12 @@ const Navigation = () => {
   };
 
   const navItems = [
-    { id: 'hero', label: 'Home' },
-    { id: 'components', label: 'Components' },
-    { id: 'features', label: 'Features' },
-    { id: 'examples', label: 'Examples' },
-    { id: 'cta', label: 'Get Started' }
+    { id: 'hero', label: 'Home', isRoute: false },
+    { id: 'components', label: 'Components', isRoute: false },
+    { id: 'features', label: 'Features', isRoute: false },
+    { id: 'examples', label: 'Examples', isRoute: false },
+    { id: 'tutorial', label: 'Tutorial', isRoute: true },
+    { id: 'cta', label: 'Get Started', isRoute: false }
   ];
 
   return (
@@ -74,16 +75,25 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className="relative px-4 py-2 text-muted-foreground hover:text-agent-blue transition-all duration-300 font-medium group"
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
-              </button>
-            ))}
+            {navItems.map((item) => 
+              item.isRoute ? (
+                <Link key={item.id} to={`/${item.id}`}>
+                  <button className="relative px-4 py-2 text-muted-foreground hover:text-agent-blue transition-all duration-300 font-medium group">
+                    {item.label}
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="relative px-4 py-2 text-muted-foreground hover:text-agent-blue transition-all duration-300 font-medium group"
+                >
+                  {item.label}
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                </button>
+              )
+            )}
           </div>
 
           {/* Desktop CTA */}
@@ -164,15 +174,23 @@ const Navigation = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-all duration-300"
-                >
-                  {item.label}
-                </button>
-              ))}
+              {navItems.map((item) => 
+                item.isRoute ? (
+                  <Link key={item.id} to={`/${item.id}`} onClick={() => setIsMobileMenuOpen(false)}>
+                    <button className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-all duration-300">
+                      {item.label}
+                    </button>
+                  </Link>
+                ) : (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-all duration-300"
+                  >
+                    {item.label}
+                  </button>
+                )
+              )}
               <div className="pt-2 space-y-2">
                 <Link to="/intelligent-agents" className="block">
                   <Button 
