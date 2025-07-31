@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 const Tutorial = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const useCases = [
     {
@@ -111,7 +112,10 @@ const Tutorial = () => {
               Learn how to build, train, and deploy scalable AI agents that improve over time
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button size="lg" onClick={() => setCurrentStep(0)} className="flex items-center gap-2">
+              <Button size="lg" onClick={() => {
+                setCurrentStep(0);
+                setActiveTab("getting-started");
+              }} className="flex items-center gap-2">
                 <Play className="w-4 h-4" />
                 Start Tutorial
               </Button>
@@ -125,7 +129,7 @@ const Tutorial = () => {
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        <Tabs defaultValue="overview" className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="use-cases">Use Cases</TabsTrigger>
