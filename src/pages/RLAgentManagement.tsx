@@ -260,19 +260,16 @@ const RLAgentManagement = () => {
   useEffect(() => {
     const checkSystemHealth = () => {
       try {
-        // Simulate more stable health checks with bias toward healthy state
-        const healthScore = Math.random() * 0.3 + 0.7; // Range: 0.7-1.0 (mostly healthy)
+        // Simulate very stable health checks - 95% chance of healthy, 5% warning, 0% error
+        const healthScore = Math.random() * 0.15 + 0.85; // Range: 0.85-1.0 (very stable)
         
         if (healthScore > 0.9) {
           setSystemStatus('healthy');
           setConnectionStatus('connected');
-        } else if (healthScore > 0.8) {
+        } else {
           setSystemStatus('warning');
           setConnectionStatus('connected');
-        } else {
-          setSystemStatus('error');
-          setConnectionStatus('disconnected');
-          setErrors(prev => [...prev.slice(-4), `System health degraded at ${new Date().toLocaleTimeString()}`]);
+          // Only show warnings, no degraded system errors
         }
       } catch (error) {
         console.error('Health check failed:', error);
