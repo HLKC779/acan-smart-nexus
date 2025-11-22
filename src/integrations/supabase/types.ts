@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -118,6 +118,101 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_documents: {
+        Row: {
+          author: string | null
+          category: string
+          confidence_score: number | null
+          content: string
+          created_at: string
+          created_by: string | null
+          difficulty_level: string | null
+          document_type: string
+          embedding: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          source_url: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string
+          confidence_score?: number | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          difficulty_level?: string | null
+          document_type?: string
+          embedding?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          source_url?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          category?: string
+          confidence_score?: number | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          difficulty_level?: string | null
+          document_type?: string
+          embedding?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          source_url?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -145,119 +240,224 @@ export type Database = {
         }
         Relationships: []
       }
+      rl_agent_metrics: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          session_id: string | null
+          timestamp: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value: number
+          session_id?: string | null
+          timestamp?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          session_id?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      rl_feedback: {
+        Row: {
+          agent_id: string
+          context: Json | null
+          created_at: string
+          feedback_type: string
+          feedback_value: Json
+          id: string
+          processed: boolean | null
+          session_id: string
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          context?: Json | null
+          created_at?: string
+          feedback_type: string
+          feedback_value: Json
+          id?: string
+          processed?: boolean | null
+          session_id: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          context?: Json | null
+          created_at?: string
+          feedback_type?: string
+          feedback_value?: Json
+          id?: string
+          processed?: boolean | null
+          session_id?: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      rl_system_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_data: Json
+          interaction_type: string
+          outcome: Json | null
+          session_id: string | null
+          system_state: Json | null
+          target_element: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_data: Json
+          interaction_type: string
+          outcome?: Json | null
+          session_id?: string | null
+          system_state?: Json | null
+          target_element?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_data?: Json
+          interaction_type?: string
+          outcome?: Json | null
+          session_id?: string | null
+          system_state?: Json | null
+          target_element?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      rl_training_sessions: {
+        Row: {
+          agent_ids: string[]
+          configuration: Json | null
+          convergence_achieved: boolean | null
+          created_at: string
+          end_time: string | null
+          environment_id: string
+          id: string
+          session_name: string
+          start_time: string
+          status: string
+          total_episodes: number | null
+          total_rewards: number | null
+          updated_at: string
+        }
+        Insert: {
+          agent_ids: string[]
+          configuration?: Json | null
+          convergence_achieved?: boolean | null
+          created_at?: string
+          end_time?: string | null
+          environment_id: string
+          id?: string
+          session_name: string
+          start_time?: string
+          status?: string
+          total_episodes?: number | null
+          total_rewards?: number | null
+          updated_at?: string
+        }
+        Update: {
+          agent_ids?: string[]
+          configuration?: Json | null
+          convergence_achieved?: boolean | null
+          created_at?: string
+          end_time?: string | null
+          environment_id?: string
+          id?: string
+          session_name?: string
+          start_time?: string
+          status?: string
+          total_episodes?: number | null
+          total_rewards?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      binary_quantize: {
-        Args: { "": string } | { "": unknown }
-        Returns: unknown
-      }
-      halfvec_avg: {
-        Args: { "": number[] }
-        Returns: unknown
-      }
-      halfvec_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      halfvec_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      halfvec_typmod_in: {
-        Args: { "": unknown[] }
-        Returns: number
-      }
-      hnsw_bit_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      hnsw_halfvec_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      hnsw_sparsevec_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      hnswhandler: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ivfflat_bit_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ivfflat_halfvec_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ivfflathandler: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      l2_norm: {
-        Args: { "": unknown } | { "": unknown }
-        Returns: number
-      }
-      l2_normalize: {
-        Args: { "": string } | { "": unknown } | { "": unknown }
-        Returns: string
-      }
       search_document_chunks: {
         Args: {
+          match_count?: number
           query_embedding: string
           similarity_threshold?: number
-          match_count?: number
           user_id?: string
         }
         Returns: {
-          id: string
-          document_id: string
-          content: string
           chunk_index: number
-          similarity: number
-          document_title: string
+          content: string
           document_created_at: string
+          document_id: string
+          document_title: string
+          id: string
+          similarity: number
         }[]
       }
-      sparsevec_out: {
-        Args: { "": unknown }
-        Returns: unknown
+      search_knowledge: {
+        Args: {
+          filter_category?: string
+          filter_type?: string
+          match_count?: number
+          query_embedding: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          category: string
+          confidence_score: number
+          content: string
+          document_id: string
+          document_type: string
+          id: string
+          metadata: Json
+          similarity: number
+          tags: string[]
+          title: string
+        }[]
       }
-      sparsevec_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      sparsevec_typmod_in: {
-        Args: { "": unknown[] }
-        Returns: number
-      }
-      vector_avg: {
-        Args: { "": number[] }
-        Returns: string
-      }
-      vector_dims: {
-        Args: { "": string } | { "": unknown }
-        Returns: number
-      }
-      vector_norm: {
-        Args: { "": string }
-        Returns: number
-      }
-      vector_out: {
-        Args: { "": string }
-        Returns: unknown
-      }
-      vector_send: {
-        Args: { "": string }
-        Returns: string
-      }
-      vector_typmod_in: {
-        Args: { "": unknown[] }
-        Returns: number
+      search_knowledge_documents: {
+        Args: {
+          match_count?: number
+          query_embedding: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          category: string
+          content: string
+          document_type: string
+          id: string
+          metadata: Json
+          similarity: number
+          tags: string[]
+          title: string
+        }[]
       }
     }
     Enums: {
